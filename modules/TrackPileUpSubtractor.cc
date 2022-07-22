@@ -153,14 +153,23 @@ void TrackPileUpSubtractor::Process()
       phi = candidateMomentum.Phi();
       e = candidateMomentum.E();
 
-      z = particle->Position.Z();
+      //      z = particle->Position.Z();
+      z = candidate->InitialPosition.Z();
 
       // apply pile-up subtraction
       // assume perfect pile-up subtraction for tracks outside fZVertexResolution
 
-      if(candidate->Charge != 0 && candidate->IsPU && TMath::Abs(z - zvtx) > fFormula->Eval(pt, eta, phi, e) * 1.0e3)
+      if(candidate->Charge != 0 && TMath::Abs(z - zvtx) > 0.003 * 1.0e3)
       {
-        candidate->IsRecoPU = 1;
+	candidate->IsRecoPU = 1;	
+	if (TMath::Abs(candidate->PID) == 211 || TMath::Abs(candidate->PID) == 2212 || TMath::Abs(candidate->PID) == 11 || TMath::Abs(candidate->PID) == 13){
+	  if (TMath::Abs(particle->Position.Z() - zvtx)<10) {
+	    candidate->IsRecoPU = 0;
+	    if(candidate->Momentum.Pt() > fPTMin) array->Add(candidate);
+	  }
+	}
+	
+	
       }
       else
       {
